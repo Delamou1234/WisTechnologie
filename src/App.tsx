@@ -115,88 +115,58 @@ export default function App() {
     fetchInitialData();
   }, []);
 
+  // Shared POST helper for admin saves. If the server says the session is no
+  // longer valid (expired/logged out elsewhere), send the admin back to the
+  // login screen instead of pretending the save succeeded.
+  const postToBackend = async (url: string, body: unknown) => {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (res.status === 401) {
+        window.location.href = '/admin';
+      }
+    } catch (e) {
+      console.error(`Failed to sync with backend server (${url})`, e);
+    }
+  };
+
   const updateServices = async (newServices: Service[]) => {
     setServices(newServices);
     localStorage.setItem('wistech_services', JSON.stringify(newServices));
-    try {
-      await fetch('/api/services', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newServices)
-      });
-    } catch (e) {
-      console.error('Failed to sync services with backend server', e);
-    }
+    await postToBackend('/api/services', newServices);
   };
 
   const updateProjects = async (newProjects: Project[]) => {
     setProjects(newProjects);
     localStorage.setItem('wistech_projects', JSON.stringify(newProjects));
-    try {
-      await fetch('/api/projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newProjects)
-      });
-    } catch (e) {
-      console.error('Failed to sync projects with backend server', e);
-    }
+    await postToBackend('/api/projects', newProjects);
   };
 
   const updateTestimonials = async (newTestimonials: Testimonial[]) => {
     setTestimonials(newTestimonials);
     localStorage.setItem('wistech_testimonials', JSON.stringify(newTestimonials));
-    try {
-      await fetch('/api/testimonials', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newTestimonials)
-      });
-    } catch (e) {
-      console.error('Failed to sync testimonials with backend server', e);
-    }
+    await postToBackend('/api/testimonials', newTestimonials);
   };
 
   const updateTeam = async (newTeam: TeamMember[]) => {
     setTeam(newTeam);
     localStorage.setItem('wistech_team', JSON.stringify(newTeam));
-    try {
-      await fetch('/api/team', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newTeam)
-      });
-    } catch (e) {
-      console.error('Failed to sync team with backend server', e);
-    }
+    await postToBackend('/api/team', newTeam);
   };
 
   const updateBenefits = async (newBenefits: Benefit[]) => {
     setBenefits(newBenefits);
     localStorage.setItem('wistech_benefits', JSON.stringify(newBenefits));
-    try {
-      await fetch('/api/benefits', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newBenefits)
-      });
-    } catch (e) {
-      console.error('Failed to sync benefits with backend server', e);
-    }
+    await postToBackend('/api/benefits', newBenefits);
   };
 
   const updateFormations = async (newFormations: Formation[]) => {
     setFormations(newFormations);
     localStorage.setItem('wistech_formations', JSON.stringify(newFormations));
-    try {
-      await fetch('/api/formations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newFormations)
-      });
-    } catch (e) {
-      console.error('Failed to sync formations with backend server', e);
-    }
+    await postToBackend('/api/formations', newFormations);
   };
 
   const resetAllToDefault = async () => {
@@ -214,11 +184,7 @@ export default function App() {
     localStorage.setItem('wistech_benefits', JSON.stringify(BENEFITS_DATA));
     localStorage.setItem('wistech_formations', JSON.stringify(FORMATIONS_DATA));
 
-    try {
-      await fetch('/api/reset', { method: 'POST' });
-    } catch (e) {
-      console.error('Failed to reset backend data', e);
-    }
+    await postToBackend('/api/reset', {});
   };
 
   // Monitor scroll for Scroll-to-Top visibility

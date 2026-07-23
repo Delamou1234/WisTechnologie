@@ -78,9 +78,20 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 }) => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const [passcode, setPasscode] = useState('');
   const [authError, setAuthError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
+  // Restore an existing server-side session on page load/refresh so admins
+  // aren't forced to re-enter the passcode every time they reload /admin.
+  useEffect(() => {
+    fetch('/api/admin/session')
+      .then(res => res.json())
+      .then(data => setIsAuthenticated(!!data.authenticated))
+      .catch(() => setIsAuthenticated(false))
+      .finally(() => setCheckingSession(false));
+  }, []);
   
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [searchQuery, setSearchQuery] = useState('');
@@ -249,26 +260,30 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     }
   };
 
-  const handleAuth = (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (passcode === 'wistech2026@') {
-      setIsAuthenticated(true);
-      setAuthError('');
-      setPasscode(''); // Clear the passcode immediately so it is never visible
-      triggerNotification('Connexion réussie en tant qu\'administrateur');
-    } else {
-      setAuthError('Code de sécurité incorrect. Veuillez contacter l\'administrateur système.');
+    setAuthError('');
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode })
+      });
+      if (res.ok) {
+        setIsAuthenticated(true);
+        setPasscode(''); // Clear the passcode immediately so it is never visible
+        triggerNotification('Connexion réussie en tant qu\'administrateur');
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setAuthError(data.error || 'Code de sécurité incorrect. Veuillez contacter l\'administrateur système.');
+      }
+    } catch {
+      setAuthError('Impossible de contacter le serveur. Vérifiez votre connexion.');
     }
   };
 
-  const bypassAuth = () => {
-    setIsAuthenticated(true);
-    setPasscode(''); // Clear passcode on bypass to make sure it's not visible
-    setAuthError('');
-    triggerNotification('Connexion en mode démonstration');
-  };
-
   const handleLogout = () => {
+    fetch('/api/admin/logout', { method: 'POST' }).catch(() => {});
     setIsAuthenticated(false);
     setPasscode('');
     setActiveTab('overview');
@@ -647,6 +662,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     { id: 'settings', label: 'Paramètres Système', icon: Sliders }
   ];
 
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen w-full bg-slate-950 flex items-center justify-center">
+        <Loader2 className="animate-spin text-gold-500" size={32} />
+      </div>
+    );
+  }
+
   return (
     <div
       className={!isAuthenticated
@@ -778,17 +801,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             <Unlock size={14} />
                           </button>
                         </form>
-
-                        <div className="border-t border-slate-800/80 pt-4 text-center space-y-2">
-                          <p className="text-[10px] text-slate-500 uppercase tracking-widest font-mono">Mode démonstration</p>
-                          <button
-                            type="button"
-                            onClick={bypassAuth}
-                            className="text-xs font-semibold text-gold-500 hover:text-gold-400 transition-colors cursor-pointer hover:underline"
-                          >
-                            Accéder instantanément en mode démo →
-                          </button>
-                        </div>
                       </div>
 
                       <p className="text-[10px] font-mono text-slate-600 text-center md:hidden">

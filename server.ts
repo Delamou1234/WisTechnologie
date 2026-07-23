@@ -4,6 +4,7 @@ import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import nodemailer from 'nodemailer';
 import * as db from './db';
+import * as auth from './auth';
 
 const PORT = 3000;
 
@@ -40,12 +41,33 @@ async function startServer() {
 
   // API Endpoints
 
+  // --- ADMIN AUTH ---
+  app.post('/api/admin/login', asyncHandler(async (req, res) => {
+    const { passcode } = req.body;
+    if (!auth.checkPassword(passcode)) {
+      return res.status(401).json({ error: 'Code de sécurité incorrect. Veuillez contacter l\'administrateur système.' });
+    }
+    const token = auth.createSession();
+    auth.setSessionCookie(res, token);
+    res.json({ success: true });
+  }));
+
+  app.post('/api/admin/logout', asyncHandler(async (req, res) => {
+    auth.destroySession(auth.getSessionToken(req));
+    auth.clearSessionCookie(res);
+    res.json({ success: true });
+  }));
+
+  app.get('/api/admin/session', asyncHandler(async (req, res) => {
+    res.json({ authenticated: auth.isValidSession(auth.getSessionToken(req)) });
+  }));
+
   // --- SERVICES ---
   app.get('/api/services', asyncHandler(async (req, res) => {
     res.json(await db.getServices());
   }));
 
-  app.post('/api/services', asyncHandler(async (req, res) => {
+  app.post('/api/services', auth.requireAdmin, asyncHandler(async (req, res) => {
     if (Array.isArray(req.body)) {
       await db.setServices(req.body);
       res.json({ success: true, message: 'Services saved successfully' });
@@ -59,7 +81,7 @@ async function startServer() {
     res.json(await db.getProjects());
   }));
 
-  app.post('/api/projects', asyncHandler(async (req, res) => {
+  app.post('/api/projects', auth.requireAdmin, asyncHandler(async (req, res) => {
     if (Array.isArray(req.body)) {
       await db.setProjects(req.body);
       res.json({ success: true, message: 'Projects saved successfully' });
@@ -73,7 +95,7 @@ async function startServer() {
     res.json(await db.getTestimonials());
   }));
 
-  app.post('/api/testimonials', asyncHandler(async (req, res) => {
+  app.post('/api/testimonials', auth.requireAdmin, asyncHandler(async (req, res) => {
     if (Array.isArray(req.body)) {
       await db.setTestimonials(req.body);
       res.json({ success: true, message: 'Testimonials saved successfully' });
@@ -87,7 +109,7 @@ async function startServer() {
     res.json(await db.getTeam());
   }));
 
-  app.post('/api/team', asyncHandler(async (req, res) => {
+  app.post('/api/team', auth.requireAdmin, asyncHandler(async (req, res) => {
     if (Array.isArray(req.body)) {
       await db.setTeam(req.body);
       res.json({ success: true, message: 'Team members saved successfully' });
@@ -101,7 +123,7 @@ async function startServer() {
     res.json(await db.getBenefits());
   }));
 
-  app.post('/api/benefits', asyncHandler(async (req, res) => {
+  app.post('/api/benefits', auth.requireAdmin, asyncHandler(async (req, res) => {
     if (Array.isArray(req.body)) {
       await db.setBenefits(req.body);
       res.json({ success: true, message: 'Benefits saved successfully' });
@@ -115,7 +137,7 @@ async function startServer() {
     res.json(await db.getFormations());
   }));
 
-  app.post('/api/formations', asyncHandler(async (req, res) => {
+  app.post('/api/formations', auth.requireAdmin, asyncHandler(async (req, res) => {
     if (Array.isArray(req.body)) {
       await db.setFormations(req.body);
       res.json({ success: true, message: 'Formations saved successfully' });
@@ -197,16 +219,16 @@ async function startServer() {
   }));
 
   // Get messages (For the admin to view in CMS)
-  app.get('/api/messages', asyncHandler(async (req, res) => {
+  app.get('/api/messages', auth.requireAdmin, asyncHandler(async (req, res) => {
     res.json(await db.getMessages());
   }));
 
-  // --- SMTP SETTINGS ENDPOINTS ---
-  app.get('/api/settings/smtp', asyncHandler(async (req, res) => {
+  // --- SMTP SETTINGS ENDPOINTS (admin-only: this exposes the SMTP password) ---
+  app.get('/api/settings/smtp', auth.requireAdmin, asyncHandler(async (req, res) => {
     res.json(await db.getSmtpConfig());
   }));
 
-  app.post('/api/settings/smtp', asyncHandler(async (req, res) => {
+  app.post('/api/settings/smtp', auth.requireAdmin, asyncHandler(async (req, res) => {
     const { host, port, secure, user, pass, toEmail, enabled } = req.body;
     const current = await db.getSmtpConfig();
     const smtp = await db.setSmtpConfig({
@@ -221,7 +243,7 @@ async function startServer() {
     res.json({ success: true, message: 'Configuration SMTP enregistrée avec succès', smtp });
   }));
 
-  app.post('/api/settings/smtp/test', asyncHandler(async (req, res) => {
+  app.post('/api/settings/smtp/test', auth.requireAdmin, asyncHandler(async (req, res) => {
     const { host, port, secure, user, pass, toEmail } = req.body;
     const current = await db.getSmtpConfig();
     const testSmtp = {
@@ -277,7 +299,7 @@ async function startServer() {
   }));
 
   // Reset to default
-  app.post('/api/reset', asyncHandler(async (req, res) => {
+  app.post('/api/reset', auth.requireAdmin, asyncHandler(async (req, res) => {
     await db.resetContentToDefaults();
     res.json({ success: true, message: 'Data reset to default values' });
   }));
@@ -287,7 +309,7 @@ async function startServer() {
   // touched the admin console and what they did. Fire-and-forget from the
   // client's point of view — always responds success even if email is off
   // or fails, so a notification hiccup never blocks the admin's actual work.
-  app.post('/api/admin/notify', asyncHandler(async (req, res) => {
+  app.post('/api/admin/notify', auth.requireAdmin, asyncHandler(async (req, res) => {
     const { message } = req.body;
     if (!message || typeof message !== 'string') {
       return res.status(400).json({ error: 'message is required' });
