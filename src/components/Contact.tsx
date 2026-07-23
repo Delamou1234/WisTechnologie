@@ -227,7 +227,7 @@ export const Contact: React.FC<ContactProps> = ({
                   <button
                     id="reset-form-btn"
                     onClick={() => setFormState('idle')}
-                    className="mt-4 px-5 py-2.5 bg-slate-100 hover:bg-slate-250 text-slate-700 font-semibold text-xs rounded-xl transition-all cursor-pointer"
+                    className="mt-4 px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-all cursor-pointer"
                   >
                     Envoyer un nouveau message
                   </button>

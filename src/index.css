@@ -101,6 +101,29 @@ body {
   background-color: rgba(26, 36, 65, 0.5) !important;
 }
 
+/* Light "chip" surfaces (badges, pills, filter buttons, hover states) used
+   across Hero/Navbar/Faq/Contact/Realizations/ProjectEstimator — without
+   these, they render as light-gray boxes on the dark background. */
+.theme-dark .bg-slate-100,
+.theme-dark .bg-slate-100\/50,
+.theme-dark .bg-slate-100\/80 {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+.theme-dark .hover\:bg-slate-100:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+.theme-dark .bg-slate-200,
+.theme-dark .bg-slate-200\/80 {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+.theme-dark .hover\:bg-slate-200:hover,
+.theme-dark .hover\:bg-slate-200\/80:hover {
+  background-color: rgba(255, 255, 255, 0.14) !important;
+}
+.theme-dark .bg-slate-50\/30 {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
 /* Text color adaptations */
 .theme-dark .text-brand-900 {
   color: #f1f5f9 !important;
@@ -112,6 +135,9 @@ body {
   color: #f8fafc !important;
 }
 .theme-dark .text-slate-600 {
+  color: #94a3b8 !important;
+}
+.theme-dark .text-slate-500 {
   color: #94a3b8 !important;
 }
 .theme-dark .text-slate-700 {
@@ -127,6 +153,7 @@ body {
 /* Border color adaptations */
 .theme-dark .border-slate-100,
 .theme-dark .border-slate-200,
+.theme-dark .border-slate-300,
 .theme-dark .border-brand-100 {
   border-color: #1e293b !important;
 }
