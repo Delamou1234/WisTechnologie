@@ -10,11 +10,19 @@ View your app in AI Studio: https://ai.studio/apps/79170cec-6371-4cc2-a69d-fdf95
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
+**Prerequisites:** Node.js, Docker (for the PostgreSQL database)
 
-
-1. Install dependencies:
+1. Copy the environment template and adjust if needed (defaults already match `docker-compose.yml`):
+   `cp .env.example .env`
+2. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+3. Start the database container:
+   `npm run db:up`
+4. Run the app:
    `npm run dev`
+
+The app connects to PostgreSQL using `DB_HOST`/`DB_PORT`/`DB_NAME`/`DB_USER`/`DB_PASSWORD` from `.env` (or a single `DATABASE_URL`, which takes priority). On first boot with an empty database, the server seeds the content tables from `data-store.json` if that legacy file is present, otherwise from the built-in defaults in `src/data.ts`.
+
+Other database commands:
+- `npm run db:down` — stop the container
+- `npm run db:logs` — tail the Postgres logs
