@@ -237,6 +237,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const triggerNotification = (text: string, type: 'success' | 'error' = 'success') => {
     setNotification({ text, type });
     setTimeout(() => setNotification(null), 3500);
+
+    // Keep the site owner informed by email of connections and actions
+    // taken in the admin console. Fire-and-forget: never blocks the UI.
+    if (type === 'success') {
+      fetch('/api/admin/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text })
+      }).catch(() => {});
+    }
   };
 
   const handleAuth = (e: React.FormEvent) => {

@@ -16,6 +16,21 @@ function asyncHandler(fn: (req: express.Request, res: express.Response) => Promi
   };
 }
 
+function createSmtpTransporter(smtp: Pick<db.SmtpConfig, 'host' | 'port' | 'secure' | 'user' | 'pass'>) {
+  return nodemailer.createTransport({
+    host: smtp.host,
+    port: smtp.port,
+    secure: smtp.secure,
+    auth: {
+      user: smtp.user,
+      pass: smtp.pass,
+    },
+    tls: {
+      rejectUnauthorized: false
+    }
+  });
+}
+
 async function startServer() {
   await db.waitForDb();
   await db.ensureSeeded();
@@ -121,18 +136,7 @@ async function startServer() {
     const smtp = await db.getSmtpConfig();
     if (smtp.enabled && smtp.host && smtp.user && smtp.pass) {
       try {
-        const transporter = nodemailer.createTransport({
-          host: smtp.host,
-          port: smtp.port,
-          secure: smtp.secure,
-          auth: {
-            user: smtp.user,
-            pass: smtp.pass,
-          },
-          tls: {
-            rejectUnauthorized: false
-          }
-        });
+        const transporter = createSmtpTransporter(smtp);
 
         const mailSubject = `[WisTech Contact] ${subject || 'Nouveau message'}`;
         const mailHtml = `
@@ -234,18 +238,7 @@ async function startServer() {
     }
 
     try {
-      const transporter = nodemailer.createTransport({
-        host: testSmtp.host,
-        port: testSmtp.port,
-        secure: testSmtp.secure,
-        auth: {
-          user: testSmtp.user,
-          pass: testSmtp.pass
-        },
-        tls: {
-          rejectUnauthorized: false
-        }
-      });
+      const transporter = createSmtpTransporter(testSmtp);
 
       await transporter.verify();
 
@@ -287,6 +280,68 @@ async function startServer() {
   app.post('/api/reset', asyncHandler(async (req, res) => {
     await db.resetContentToDefaults();
     res.json({ success: true, message: 'Data reset to default values' });
+  }));
+
+  // Admin activity notifications: the CMS calls this after every successful
+  // login and content action so the site owner gets an email trail of who
+  // touched the admin console and what they did. Fire-and-forget from the
+  // client's point of view — always responds success even if email is off
+  // or fails, so a notification hiccup never blocks the admin's actual work.
+  app.post('/api/admin/notify', asyncHandler(async (req, res) => {
+    const { message } = req.body;
+    if (!message || typeof message !== 'string') {
+      return res.status(400).json({ error: 'message is required' });
+    }
+
+    const smtp = await db.getSmtpConfig();
+    if (smtp.enabled && smtp.host && smtp.user && smtp.pass) {
+      const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || 'IP inconnue';
+      const userAgent = req.headers['user-agent'] || 'Navigateur inconnu';
+      const timestamp = new Date().toLocaleString('fr-FR');
+
+      try {
+        const transporter = createSmtpTransporter(smtp);
+        await transporter.sendMail({
+          from: `"${smtp.user}" <${smtp.user}>`,
+          to: smtp.toEmail || 'samakedelamou858@gmail.com',
+          subject: `[WisTech CMS] ${message}`,
+          html: `
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+              <div style="background-color: #0b1329; padding: 20px; border-radius: 8px 8px 0 0; text-align: center; color: #ffffff;">
+                <h2 style="margin: 0; font-size: 20px; color: #d4af37; letter-spacing: 1px;">WisTechnologie CMS</h2>
+                <p style="margin: 5px 0 0 0; font-size: 12px; color: #94a3b8;">Activité sur la console d'administration</p>
+              </div>
+              <div style="padding: 20px; color: #1e293b;">
+                <p style="font-size: 16px; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">${message}</p>
+                <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                  <tr>
+                    <td style="padding: 8px 0; font-weight: bold; width: 100px; color: #64748b;">Date :</td>
+                    <td style="padding: 8px 0; color: #0f172a;">${timestamp}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; font-weight: bold; color: #64748b;">Adresse IP :</td>
+                    <td style="padding: 8px 0; color: #0f172a;">${ip}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; font-weight: bold; color: #64748b;">Navigateur :</td>
+                    <td style="padding: 8px 0; color: #0f172a;">${userAgent}</td>
+                  </tr>
+                </table>
+              </div>
+              <div style="background-color: #f8fafc; padding: 15px; border-radius: 0 0 8px 8px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+                Notification automatique de la console d'administration WisTechnologie.
+              </div>
+            </div>
+          `,
+          text: `${message}\nDate : ${timestamp}\nIP : ${ip}\nNavigateur : ${userAgent}`
+        });
+        console.log(`Admin notify email sent: "${message}"`);
+      } catch (err) {
+        console.error('Admin notify email dispatch error:', err);
+      }
+    }
+
+    res.json({ success: true });
   }));
 
   // Vite integration middleware
