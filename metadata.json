@@ -1,0 +1,6 @@
+{
+  "name": "WisTechnologie",
+  "description": "Site officiel de WisTechnologie - Solutions Digitales, Conseil et Ingénierie Informatique Premium.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

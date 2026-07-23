@@ -1,0 +1,12 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# Legacy flat-file store — superseded by PostgreSQL (see docker-compose.yml).
+# Only kept around as a one-time import source for db.ts's ensureSeeded().
+data-store.json

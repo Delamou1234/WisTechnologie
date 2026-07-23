@@ -1,0 +1,253 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: #f8fafc;
+  color: #0f172a;
+  font-family: "Plus Jakarta Sans", "Inter", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", "Plus Jakarta Sans", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  
+  --color-brand-50: #f4f6fa;
+  --color-brand-100: #e9edf5;
+  --color-brand-200: #c9d5e7;
+  --color-brand-300: #9cb1d1;
+  --color-brand-400: #6888b7;
+  --color-brand-500: #46679b;
+  --color-brand-600: #354f7a;
+  --color-brand-700: #2c3f63;
+  --color-brand-800: #1b263b;
+  --color-brand-900: #0d131f;
+  --color-brand-950: #070a11;
+  
+  --color-gold-50: #fffdf5;
+  --color-gold-100: #fdf6e2;
+  --color-gold-500: #d4af37;
+  --color-gold-600: #b5922a;
+}
+
+@layer utilities {
+  .text-gradient {
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-image: linear-gradient(135deg, var(--color-brand-800), var(--color-brand-500));
+  }
+  
+  .text-gradient-gold {
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-image: linear-gradient(135deg, var(--color-brand-400), var(--color-gold-500));
+  }
+
+  .glow-subtle {
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+  }
+  
+  .glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+  }
+}
+
+/* Custom Global Theme Selectors */
+
+/* 1. DARK THEME OVERRIDES */
+.theme-dark {
+  background-color: #080a13 !important;
+  color: #f8fafc !important;
+}
+
+/* Base sections and wrappers bg and text */
+.theme-dark .bg-white {
+  background-color: #0f1424 !important;
+}
+.theme-dark .bg-slate-50 {
+  background-color: #080a13 !important;
+}
+.theme-dark .bg-brand-50 {
+  background-color: rgba(26, 36, 65, 0.3) !important;
+}
+.theme-dark .bg-brand-100 {
+  background-color: rgba(26, 36, 65, 0.5) !important;
+}
+
+/* Text color adaptations */
+.theme-dark .text-brand-900 {
+  color: #f1f5f9 !important;
+}
+.theme-dark .text-brand-950 {
+  color: #ffffff !important;
+}
+.theme-dark .text-slate-900 {
+  color: #f8fafc !important;
+}
+.theme-dark .text-slate-600 {
+  color: #94a3b8 !important;
+}
+.theme-dark .text-slate-700 {
+  color: #cbd5e1 !important;
+}
+.theme-dark .text-slate-800 {
+  color: #e2e8f0 !important;
+}
+.theme-dark .text-brand-600 {
+  color: #99aad0 !important;
+}
+
+/* Border color adaptations */
+.theme-dark .border-slate-100,
+.theme-dark .border-slate-200,
+.theme-dark .border-brand-100 {
+  border-color: #1e293b !important;
+}
+
+/* Card overrides */
+.theme-dark .group {
+  background-color: #0f1424 !important;
+}
+.theme-dark .group:hover {
+  border-color: #334155 !important;
+}
+
+/* Input / Form adaptations */
+.theme-dark input,
+.theme-dark textarea,
+.theme-dark select {
+  background-color: #0f1424 !important;
+  color: #f8fafc !important;
+  border-color: #1e293b !important;
+}
+.theme-dark input:focus,
+.theme-dark textarea:focus {
+  border-color: #425f9c !important;
+}
+
+
+/* 2. GUINEA SYLI THEME OVERRIDES */
+/* Forest dark-green, golden-yellow, and bright red accents */
+.theme-guinea {
+  background-color: #030804 !important;
+  color: #eaf6ec !important;
+}
+
+/* Base sections and wrappers bg and text */
+.theme-guinea .bg-white {
+  background-color: #081109 !important;
+}
+.theme-guinea .bg-slate-50 {
+  background-color: #030804 !important;
+}
+.theme-guinea .bg-brand-50 {
+  background-color: rgba(0, 168, 89, 0.08) !important;
+}
+.theme-guinea .bg-brand-100 {
+  background-color: rgba(254, 192, 7, 0.1) !important;
+}
+.theme-guinea .bg-brand-900 {
+  background-color: #040d06 !important;
+}
+.theme-guinea .bg-brand-950 {
+  background-color: #020603 !important;
+}
+
+/* Text color adaptations */
+.theme-guinea .text-brand-900 {
+  color: #eaf6ec !important;
+}
+.theme-guinea .text-brand-950 {
+  color: #ffffff !important;
+}
+.theme-guinea .text-slate-900 {
+  color: #eaf6ec !important;
+}
+.theme-guinea .text-slate-600 {
+  color: #a4bfa9 !important;
+}
+.theme-guinea .text-slate-700 {
+  color: #bcd4c1 !important;
+}
+.theme-guinea .text-slate-800 {
+  color: #d1ebd6 !important;
+}
+.theme-guinea .text-brand-600 {
+  color: #00a859 !important; /* Green */
+}
+.theme-guinea .text-brand-800 {
+  color: #fec007 !important; /* Gold/Yellow */
+}
+
+/* Brand badges and accents */
+.theme-guinea .bg-brand-800 {
+  background-color: #00a859 !important; /* Green */
+}
+.theme-guinea .hover\:bg-brand-900:hover {
+  background-color: #008f4b !important;
+}
+.theme-guinea .bg-brand-600 {
+  background-color: #ff3b30 !important; /* Red */
+}
+.theme-guinea .text-gradient {
+  background-image: linear-gradient(135deg, #00a859, #fec007) !important;
+}
+.theme-guinea .text-gradient-gold {
+  background-image: linear-gradient(135deg, #ff3b30, #fec007) !important;
+}
+
+/* Border color adaptations */
+.theme-guinea .border-slate-100,
+.theme-guinea .border-slate-200,
+.theme-guinea .border-brand-100 {
+  border-color: #122c17 !important;
+}
+
+/* Card overrides */
+.theme-guinea .group {
+  background-color: #081109 !important;
+}
+.theme-guinea .group:hover {
+  border-color: #fec007 !important; /* Gold on hover */
+}
+
+/* Input / Form adaptations */
+.theme-guinea input,
+.theme-guinea textarea,
+.theme-guinea select {
+  background-color: #081109 !important;
+  color: #eaf6ec !important;
+  border-color: #122c17 !important;
+}
+.theme-guinea input:focus,
+.theme-guinea textarea:focus {
+  border-color: #00a859 !important;
+}
+

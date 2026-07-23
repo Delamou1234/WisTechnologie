@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="WisTechnologie logo">
+  <rect width="64" height="64" rx="16" fill="#0f172a"/>
+  <path d="M19 18h10l8 11 8-11h10v28h-8V33l-6 8-6-8v13h-8V18z" fill="#f8fafc"/>
+  <circle cx="46" cy="20" r="4" fill="#d4af37"/>
+</svg>
