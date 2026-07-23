@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { Services } from './components/Services';
+import { Technologies } from './components/Technologies';
 import { Realizations } from './components/Realizations';
 import { Formations } from './components/Formations';
 import { About } from './components/About';
@@ -202,7 +203,7 @@ export default function App() {
 
   // Set up intersection observer to detect current section
   useEffect(() => {
-    const sections = ['home', 'services', 'realizations', 'formations', 'about', 'estimator', 'faq', 'contact'];
+    const sections = ['home', 'services', 'technologies', 'realizations', 'formations', 'about', 'estimator', 'faq', 'contact'];
     
     const observerOptions = {
       root: null,
@@ -308,6 +309,9 @@ export default function App() {
 
         {/* Services Section */}
         <Services services={services} />
+
+        {/* Technologies Section */}
+        <Technologies />
 
         {/* Realizations Section */}
         <Realizations projects={projects} />
